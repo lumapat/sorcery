@@ -1,6 +1,29 @@
 module Main (main) where
 
-import Lib
+import Options.Applicative
+
+data SorceryOptions = SorceryOptions
+    { runName :: String
+    } deriving (Eq, Show)
+
+sorceryOptions :: Parser SorceryOptions
+sorceryOptions = SorceryOptions
+        <$> strOption
+            ( long "runName"
+           <> short 'n'
+           <> metavar "NAME"
+           <> showDefault
+           <> value "testRun"
+           <> help "Name of the current run"
+            )
 
 main :: IO ()
-main = someFunc
+main = do
+   o <- execParser opts
+   putStrLn $ show o
+   where
+    opts = info (sorceryOptions <**> helper)
+         ( fullDesc
+        <> progDesc "Do sorcery"
+        <> header "Sorcery!~~~~~"
+         )
