@@ -1,10 +1,17 @@
 module Sorcery.Game
     ( Card(..)
+    , CardZone
+    , CardZones(..)
     , Game(..)
     , PerTurnAction(..)
     , Player(..)
     , PlayerTurn(..)
     , newGame
+    , playerBattlefield
+    , playerExile
+    , playerGraveyard
+    , playerHand
+    , playerLibrary
     ) where
 
 data Card
@@ -13,6 +20,30 @@ data Card
     | GenericDrawSorceryCard
     deriving (Eq, Show)
 
+type CardZone = [Card]
+data CardZones = CardZones
+    { cardZoneHand :: CardZone
+    , cardZoneLibrary :: CardZone
+    , cardZoneBattlefield :: CardZone
+    , cardZoneGraveyard :: CardZone
+    , cardZoneExile :: CardZone
+    } deriving (Eq, Show)
+
+playerHand :: Player -> CardZone
+playerHand = cardZoneHand . playerCardZones
+
+playerLibrary :: Player -> CardZone
+playerLibrary = cardZoneLibrary . playerCardZones
+
+playerBattlefield :: Player -> CardZone
+playerBattlefield = cardZoneBattlefield . playerCardZones
+
+playerGraveyard :: Player -> CardZone
+playerGraveyard = cardZoneGraveyard . playerCardZones
+
+playerExile :: Player -> CardZone
+playerExile = cardZoneExile . playerCardZones
+
 data PerTurnAction
     = DrawForTurn
     | PlayLandForTurn
@@ -20,8 +51,7 @@ data PerTurnAction
     deriving (Eq, Show)
 
 data Player = Player
-    { playerBattlefield :: [Card]
-    , playerHand :: [Card]
+    { playerCardZones :: CardZones
     , playerLifeTotal :: Int
     , playerTurnActions :: [PerTurnAction]
     } deriving (Eq, Show)
@@ -48,13 +78,21 @@ startingTurnActions = [PlayLandForTurn, EndTurn]
 
 newPlayer :: Player
 newPlayer = Player
-          { playerBattlefield = []
-          , playerHand = newHand
+          { playerCardZones = newCardZones
           , playerLifeTotal = startingLifeTotal
           , playerTurnActions = startingTurnActions
           }
 
-newHand :: [Card]
+newCardZones :: CardZones
+newCardZones = CardZones
+             { cardZoneHand = newHand
+             , cardZoneLibrary = newLibraryOfSize (40 - length newHand)
+             , cardZoneBattlefield = []
+             , cardZoneGraveyard = []
+             , cardZoneExile = []
+             }
+
+newHand :: CardZone
 newHand =
     [ GenericCreatureCard
     , GenericCSInstantCard
@@ -64,3 +102,11 @@ newHand =
     , GenericCSInstantCard
     , GenericDrawSorceryCard
     ]
+
+newLibraryOfSize :: Int -> CardZone
+newLibraryOfSize s = take s
+                   $ cycle
+                   [ GenericCreatureCard
+                   , GenericCSInstantCard
+                   , GenericDrawSorceryCard
+                   ]
