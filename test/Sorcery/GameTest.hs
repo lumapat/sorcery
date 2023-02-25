@@ -2,6 +2,7 @@ module Sorcery.GameTest (tests) where
 
 import qualified Sorcery.Game as T
 
+import Control.Lens ((^.))
 import Test.Tasty
 import Test.Tasty.HUnit
 
@@ -21,7 +22,7 @@ gameStartTests = testGroup "Starts off with"
         newGame = T.newGame
         playerStartTests playerName player = testGroup (playerName ++ " with ")
             [ testCase "20 life"
-                $ T.playerLifeTotal player @?= 20
+                $ player ^. T.playerLifeTotal @?= 20
             , testCase "Seven cards in their hand"
                 $ length (T.playerHand player) @?= 7
             , testCase "40 cards total (hand and library)"

@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Sorcery.Game
     ( Card(..)
     , CardZone
@@ -12,8 +14,21 @@ module Sorcery.Game
     , playerGraveyard
     , playerHand
     , playerLibrary
+    -- Lenses
+    -- TODO: Export or not? Or abstract away
+    , cardZoneBattlefield
+    , cardZoneExile
+    , cardZoneGraveyard
+    , cardZoneHand
+    , cardZoneLibrary
+    , playerCardZones
+    , playerLifeTotal
+    , playerTurnActions
     ) where
 
+import Control.Lens
+
+-- TODO: Move all of these into their own "game state" module
 data Card
     = GenericCreatureCard
     | GenericCSInstantCard
@@ -22,27 +37,12 @@ data Card
 
 type CardZone = [Card]
 data CardZones = CardZones
-    { cardZoneHand :: CardZone
-    , cardZoneLibrary :: CardZone
-    , cardZoneBattlefield :: CardZone
-    , cardZoneGraveyard :: CardZone
-    , cardZoneExile :: CardZone
+    { _cardZoneHand :: CardZone
+    , _cardZoneLibrary :: CardZone
+    , _cardZoneBattlefield :: CardZone
+    , _cardZoneGraveyard :: CardZone
+    , _cardZoneExile :: CardZone
     } deriving (Eq, Show)
-
-playerHand :: Player -> CardZone
-playerHand = cardZoneHand . playerCardZones
-
-playerLibrary :: Player -> CardZone
-playerLibrary = cardZoneLibrary . playerCardZones
-
-playerBattlefield :: Player -> CardZone
-playerBattlefield = cardZoneBattlefield . playerCardZones
-
-playerGraveyard :: Player -> CardZone
-playerGraveyard = cardZoneGraveyard . playerCardZones
-
-playerExile :: Player -> CardZone
-playerExile = cardZoneExile . playerCardZones
 
 data PerTurnAction
     = DrawForTurn
@@ -51,9 +51,9 @@ data PerTurnAction
     deriving (Eq, Show)
 
 data Player = Player
-    { playerCardZones :: CardZones
-    , playerLifeTotal :: Int
-    , playerTurnActions :: [PerTurnAction]
+    { _playerCardZones :: CardZones
+    , _playerLifeTotal :: Int
+    , _playerTurnActions :: [PerTurnAction]
     } deriving (Eq, Show)
 
 data PlayerTurn
@@ -67,6 +67,25 @@ data Game = Game
     , gameCurrentTurn :: PlayerTurn
     } deriving (Eq, Show)
 
+-- Generate lenses
+makeLenses ''CardZones
+makeLenses ''Player
+
+playerHand :: Player -> CardZone
+playerHand = view (playerCardZones . cardZoneHand)
+
+playerLibrary :: Player -> CardZone
+playerLibrary = view (playerCardZones . cardZoneLibrary)
+
+playerBattlefield :: Player -> CardZone
+playerBattlefield = view (playerCardZones . cardZoneBattlefield)
+
+playerGraveyard :: Player -> CardZone
+playerGraveyard = view (playerCardZones . cardZoneGraveyard)
+
+playerExile :: Player -> CardZone
+playerExile = view (playerCardZones . cardZoneExile)
+
 newGame :: Game
 newGame = Game newPlayer newPlayer PlayerOneTurn
 
@@ -78,18 +97,18 @@ startingTurnActions = [PlayLandForTurn, EndTurn]
 
 newPlayer :: Player
 newPlayer = Player
-          { playerCardZones = newCardZones
-          , playerLifeTotal = startingLifeTotal
-          , playerTurnActions = startingTurnActions
+          { _playerCardZones = newCardZones
+          , _playerLifeTotal = startingLifeTotal
+          , _playerTurnActions = startingTurnActions
           }
 
 newCardZones :: CardZones
 newCardZones = CardZones
-             { cardZoneHand = newHand
-             , cardZoneLibrary = newLibraryOfSize (40 - length newHand)
-             , cardZoneBattlefield = []
-             , cardZoneGraveyard = []
-             , cardZoneExile = []
+             { _cardZoneHand = newHand
+             , _cardZoneLibrary = newLibraryOfSize (40 - length newHand)
+             , _cardZoneBattlefield = []
+             , _cardZoneGraveyard = []
+             , _cardZoneExile = []
              }
 
 newHand :: CardZone
@@ -110,3 +129,7 @@ newLibraryOfSize s = take s
                    , GenericCSInstantCard
                    , GenericDrawSorceryCard
                    ]
+
+-- Game Actions
+-- drawCards :: Int -> Player -> (Player, [Card])
+-- drawCards numTimes player =
