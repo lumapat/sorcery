@@ -9,6 +9,7 @@ import Test.Tasty.HUnit
 tests :: TestTree
 tests = testGroup "Game"
       [ gameStartTests
+      , gameActionTests
       ]
 
 gameStartTests :: TestTree
@@ -34,3 +35,18 @@ gameStartTests = testGroup "Starts off with"
             , testCase "An empty graveyard"
                 $ T.playerExile player @?= []
             ]
+
+gameActionTests = testGroup "When a player"
+    [ drawTests
+    ]
+    where
+        drawTests = testGroup "draws a card"
+            [ testCase "the card is put into their hand"
+                $ length (T.playerHand playerThatDrewCard) @?= 8
+            , testCase "the card is removed from their library"
+                $ length (T.playerLibrary playerThatDrewCard) @?= 32
+            , testCase "the number of cards stay the same between their hand and library"
+                $ (sum . fmap (length . ($ playerThatDrewCard))) [T.playerHand, T.playerLibrary] @?= 40
+            ]
+            where
+                (playerThatDrewCard, _) = T.drawCards 1 T.newPlayer

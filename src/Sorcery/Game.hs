@@ -8,7 +8,9 @@ module Sorcery.Game
     , PerTurnAction(..)
     , Player(..)
     , PlayerTurn(..)
+    , drawCards
     , newGame
+    , newPlayer -- TODO: Does this need to be exported?
     , playerBattlefield
     , playerExile
     , playerGraveyard
@@ -131,5 +133,9 @@ newLibraryOfSize s = take s
                    ]
 
 -- Game Actions
--- drawCards :: Int -> Player -> (Player, [Card])
--- drawCards numTimes player =
+-- TODO: Optimize or make cleaner?
+drawCards :: Int -> Player -> (Player, [Card])
+drawCards numTimes player = (over (playerCardZones . cardZoneHand) (++ drawnCards) player', drawnCards)
+    where
+        drawnCards = take numTimes $ playerLibrary player
+        player' = over (playerCardZones . cardZoneLibrary) (drop numTimes) player
