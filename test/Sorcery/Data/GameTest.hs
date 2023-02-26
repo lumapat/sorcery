@@ -1,6 +1,6 @@
-module Sorcery.GameTest (tests) where
+module Sorcery.Data.GameTest (tests) where
 
-import qualified Sorcery.Game as T
+import qualified Sorcery.Data.Game as T
 
 import Control.Lens ((^.))
 import Test.Tasty

@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Sorcery.Game
+module Sorcery.Data.Game
     ( Card(..)
     , CardZone
     , CardZones(..)

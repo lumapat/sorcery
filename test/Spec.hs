@@ -1,4 +1,4 @@
-import qualified Sorcery.GameTest (tests)
+import qualified Sorcery.Data.GameTest (tests)
 
 import Test.Tasty
 
@@ -7,6 +7,5 @@ main = defaultMain tests
 
 tests :: TestTree
 tests = testGroup "Tests"
-      [ Sorcery.GameTest.tests
+      [ Sorcery.Data.GameTest.tests
       ]
-

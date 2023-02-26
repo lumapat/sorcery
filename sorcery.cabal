@@ -26,7 +26,7 @@ source-repository head
 library
   exposed-modules:
       Lib
-      Sorcery.Game
+      Sorcery.Data.Game
   other-modules:
       Paths_sorcery
   hs-source-dirs:
@@ -56,7 +56,7 @@ test-suite sorcery-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Sorcery.GameTest
+      Sorcery.Data.GameTest
       Paths_sorcery
   hs-source-dirs:
       test
